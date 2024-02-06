@@ -1,0 +1,50 @@
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.wheel{
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+textarea{
+    background-color: rgba(20, 20, 20, 0.2);
+    caret-color: #fff;
+    resize: none;
+    color: #fff;
+}
+
+.inputVals{
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.spinBTN{
+    width: 80px;
+    height: 80px;
+    border-radius: 60px;
+    background-color: #fff;
+    color: black;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bolder;
+    font-size: 22px;
+    cursor: pointer;
+}
+ 
+.arrowPointer{
+    border: 10px solid transparent; 
+    border-right: 30px solid white;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -268%;
+}
