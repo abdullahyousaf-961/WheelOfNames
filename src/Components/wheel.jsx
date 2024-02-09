@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './wheel.css';
 
 
@@ -7,15 +7,33 @@ export const Wheel = () => {
     const [items, setItems] = useState([]);
     const [itemColors, setItemColors] = useState([]);
     const [spinning, setSpinning] = useState(false);
+    const [winner, setWinner] = useState('NONE');
+
+    useEffect(() => {
+        draw();
+    }, [items, itemColors]);
 
     const handleSpinClick = () => { 
         randomRotation += 8000 + Math.floor(Math.random() * 2001); 
-        console.log(randomRotation);
         setSpinning(randomRotation);
         setTimeout(() => {
-            setSpinning(false);
-        }, 10000); 
+            const canvas = document.getElementById('canvas');
+            const currentTransform = window.getComputedStyle(canvas).getPropertyValue('transform');
+            const currentRotation = parseFloat(currentTransform.split('(')[1].split('deg)')[0]);
+            const normalizedAngle = (currentRotation - randomRotation) % 360;
+            let sectionIndex = Math.floor(normalizedAngle / (360 / items.length));
+            if (sectionIndex < 0) {
+                sectionIndex = items.length + sectionIndex;
+            }
+            const stoppingItem = items[sectionIndex];
+            setWinner(stoppingItem);
+            console.log(currentRotation);
+            console.log(normalizedAngle);
+            console.log(sectionIndex);
+            console.log(`Wheel stopped at: ${stoppingItem}`);
+        }, 10000);
     };
+    
 
     const sendColor = () => {
         const r = Math.floor(Math.random() * 255);
@@ -27,17 +45,14 @@ export const Wheel = () => {
     const toRad = (deg) => deg * (Math.PI / 180.0);
 
     const createWheel = (event) => {
-
         const textareaValue = event.target.value;
         const newItems = textareaValue.split('\n');
         setItems(newItems);
         
         const newColors = newItems.map((_, index) => itemColors[index] || sendColor());
         setItemColors(newColors);
-
-        draw();
     };
-
+    
     const draw = () => {
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -75,14 +90,19 @@ export const Wheel = () => {
             
             ctx.font = 'bold 26px helvetica';
             ctx.fillText(items[i], 120, 10);
+            
             ctx.restore();
         }
     };
 
     return (
         <div className='container'>
+
+          <div className='winner'>
+            <h1>Winner: {winner}</h1>
+          </div>
           <div className='wheel'>
-            <canvas className="" id="canvas" width="500" height="500" style={{ transform: `rotate(${spinning}deg)`,  transition: "transform 10s ease-out" }}></canvas>
+            <canvas className="" id="canvas" width="500" height="500" style={{ transform: `rotate(${spinning}deg)`, transition: "transform 10s ease-out" }}></canvas>
             <div className="spinBTN" onClick={handleSpinClick}>
               SPIN
               <div className="arrowPointer"></div>
