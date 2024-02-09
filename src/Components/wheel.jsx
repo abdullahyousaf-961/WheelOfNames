@@ -1,4 +1,6 @@
 import React, { useState,useEffect } from 'react';
+import useSound from 'use-sound';
+import clickSound from '../assets/click.wav';
 import './wheel.css';
 
 
@@ -8,31 +10,46 @@ export const Wheel = () => {
     const [itemColors, setItemColors] = useState([]);
     const [spinning, setSpinning] = useState(false);
     const [winner, setWinner] = useState('NONE');
+    const [play] = useSound(clickSound);
 
     useEffect(() => {
         draw();
     }, [items, itemColors]);
 
-    const handleSpinClick = () => { 
-        randomRotation += 8000 + Math.floor(Math.random() * 2001); 
-        setSpinning(randomRotation);
-        setTimeout(() => {
-            const canvas = document.getElementById('canvas');
-            const currentTransform = window.getComputedStyle(canvas).getPropertyValue('transform');
-            const currentRotation = parseFloat(currentTransform.split('(')[1].split('deg)')[0]);
-            const normalizedAngle = (currentRotation - randomRotation) % 360;
-            let sectionIndex = Math.floor(normalizedAngle / (360 / items.length));
-            if (sectionIndex < 0) {
-                sectionIndex = items.length + sectionIndex;
-            }
-            const stoppingItem = items[sectionIndex];
-            setWinner(stoppingItem);
-            console.log(currentRotation);
-            console.log(normalizedAngle);
-            console.log(sectionIndex);
-            console.log(`Wheel stopped at: ${stoppingItem}`);
-        }, 10000);
+    useEffect(() => {
+        play();
+    }, [winner]);
+
+const handleSpinClick = () => {
+    randomRotation += 8000 + Math.floor(Math.random() * 2001);
+    setSpinning(randomRotation);
+
+    const trackRotation = () => {
+        const canvas = document.getElementById('canvas');
+        const currentTransform = window.getComputedStyle(canvas).getPropertyValue('transform');
+        const values = currentTransform.split('(')[1].split(')')[0].split(',');
+        const a = values[0];
+        const b = values[1];
+        let currentRotation = Math.round(Math.atan2(b, a) * (180/Math.PI));
+        if (currentRotation < 0) currentRotation = 360 + currentRotation;
+    
+        const sectionAngle = 360 / items.length;
+        let sectionIndex = Math.floor((360 - currentRotation) / sectionAngle) % items.length;
+    
+        const currentItem = items[sectionIndex];
+        setWinner(currentItem);
+    
+        if (Math.abs(currentRotation - randomRotation) > 1) {
+            requestAnimationFrame(trackRotation);
+        }
     };
+    
+    requestAnimationFrame(trackRotation);
+
+    setTimeout(() => {
+        
+    }, 10000);
+};
     
 
     const sendColor = () => {
@@ -96,13 +113,10 @@ export const Wheel = () => {
     };
 
     return (
+        <div>
         <div className='container'>
-
-          <div className='winner'>
-            <h1>Winner: {winner}</h1>
-          </div>
           <div className='wheel'>
-            <canvas className="" id="canvas" width="500" height="500" style={{ transform: `rotate(${spinning}deg)`, transition: "transform 10s ease-out" }}></canvas>
+            <canvas className="" id="canvas" width="500" height="500" style={{ transform: `rotate(${spinning}deg)`, transition: "transform 10s ease" }}></canvas>
             <div className="spinBTN" onClick={handleSpinClick}>
               SPIN
               <div className="arrowPointer"></div>
@@ -112,6 +126,10 @@ export const Wheel = () => {
           <div className="inputVals">
             <textarea onChange={createWheel} rows="30" cols="30" value={items.join('\n')}></textarea>
           </div>
+        </div>
+        <div className='winner'>
+            <h1>Winner: {winner}</h1>
+        </div>
         </div>
       );
 };
