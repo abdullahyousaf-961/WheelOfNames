@@ -1,6 +1,6 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect} from 'react';
 import useSound from 'use-sound';
-import clickSound from '../assets/click.wav';
+import clickSound from '../assets/pop.mp3';
 import './wheel.css';
 
 
